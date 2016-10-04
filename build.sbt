@@ -20,18 +20,19 @@ lazy val buildSettings = Seq(
     "-language:implicitConversions", "-language:higherKinds", "-language:postfixOps",
     "-unchecked",
     "-Xfatal-warnings",
-    "-Yinline-warnings",
     "-Yno-adapted-args",
     "-Ywarn-dead-code",
     "-Ywarn-value-discard",
     "-Xfuture"
   ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2,10)) => Seq("-Yno-generic-signatures") // no generic signatures for scala 2.10.x, see SI-7932, #571 and #828
-    case _ => Seq( // https://github.com/scala/make-release-notes/blob/9cfbdc8c92f94/experimental-backend.md#emitting-java-8-style-lambdas
+    case Some((2, 10)) => Seq("-Yno-generic-signatures") // no generic signatures for scala 2.10.x, see SI-7932, #571 and #828
+    case Some((2, 11)) => Seq( // https://github.com/scala/make-release-notes/blob/9cfbdc8c92f94/experimental-backend.md#emitting-java-8-style-lambdas
       "-Ybackend:GenBCode",
       "-Ydelambdafy:method",
       "-target:jvm-1.8"
     )
+    case Some((2, 12)) => Seq("-Ydelambdafy:method", "-target:jvm-1.8")
+    case _ => Seq()
   }),
   addCompilerPlugin(kindProjector),
   resolvers ++= Seq(
@@ -42,7 +43,7 @@ lazy val buildSettings = Seq(
   scmInfo := Some(ScmInfo(url("https://github.com/julien-truffaut/Monocle"), "scm:git:git@github.com:julien-truffaut/Monocle.git"))
 )
 
-lazy val scalaz     = Def.setting("org.scalaz"      %%% "scalaz-core" % "7.3.0-M3")
+lazy val scalaz     = Def.setting("org.scalaz"      %%% "scalaz-core" % "7.3.0-M5")
 lazy val shapeless  = Def.setting("com.chuusai"     %%% "shapeless"   % "2.3.0")
 
 lazy val refinedVersion = "0.4.0"
@@ -57,7 +58,7 @@ lazy val macroCompat = Def.setting("org.typelevel" %%% "macro-compat" % "1.1.0")
 lazy val macroVersion = "2.1.0"
 lazy val paradisePlugin = compilerPlugin("org.scalamacros" %  "paradise"       % macroVersion cross CrossVersion.full)
 
-lazy val kindProjector = "org.spire-math" % "kind-projector" % "0.7.1" cross CrossVersion.binary
+lazy val kindProjector = "org.spire-math" % "kind-projector" % "0.9.0" cross CrossVersion.binary
 
 def mimaSettings(module: String): Seq[Setting[_]] = mimaDefaultSettings ++ Seq(
   previousArtifact := Some("com.github.julien-truffaut" %  (s"monocle-${module}_2.11") % "1.2.0"),
@@ -125,7 +126,10 @@ lazy val core    = crossProject
   .settings(moduleName := "monocle-core")
   .configure(monocleCrossSettings)
   .jvmSettings(mimaSettings("core"): _*)
-  .settings(libraryDependencies += scalaz.value)
+  .settings(
+    libraryDependencies += scalaz.value,
+    crossScalaVersions  += "2.12.0-RC1"
+  )
   .jvmSettings(
     libraryDependencies ++= PartialFunction.condOpt(CrossVersion.partialVersion(scalaVersion.value)) {
       case Some((2, 11)) => "org.scala-lang.modules" %% "scala-java8-compat" % "0.7.0"
