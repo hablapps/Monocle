@@ -25,6 +25,12 @@ class StateExample extends MonocleSuite {
     increment.run(p) shouldEqual ((Person("John", 31), 30))
   }
 
+  test("modi"){
+    val increment = _age modi (_ + 1)
+
+    increment.run(p) shouldEqual ((Person("John", 31), ()))
+  }
+
   test("assign"){
     val set20 = for {
       i <- _age assign 20
@@ -39,6 +45,12 @@ class StateExample extends MonocleSuite {
     } yield i
 
     set20.run(p) shouldEqual ((Person("John", 20), 30))
+  }
+
+  test("assigni"){
+    val set20 = _age assigni 20
+
+    set20.run(p) shouldEqual ((Person("John", 20), ()))
   }
 
   val _oldAge = Optional[Person, Int](p => if (p.age > 50) Some(p.age) else None){ a => _.copy(age = a) }

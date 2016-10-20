@@ -3,6 +3,7 @@ package monocle.state
 import monocle.PLens
 
 import scalaz.{IndexedState, State}
+import scalaz.syntax.functor._
 
 trait StateLensSyntax {
   implicit def toStateLensOps[S, T, A, B](lens: PLens[S, T, A, B]): StateLensOps[S, T, A, B] =
@@ -30,6 +31,10 @@ final class StateLensOps[S, T, A, B](lens: PLens[S, T, A, B]) {
   def modo(f: A => B): IndexedState[S, T, A] =
     toState.leftMap(lens.modify(f))
 
+  /** modify the value viewed through the lens and ignores both values */
+  def modi(f: A => B): IndexedState[S, T, Unit] =
+    mod(f) >| (())
+
   /** set the value viewed through the lens and returns its *new* value */
   def assign(b: B): IndexedState[S, T, B] =
     mod(_ => b)
@@ -37,4 +42,8 @@ final class StateLensOps[S, T, A, B](lens: PLens[S, T, A, B]) {
   /** set the value viewed through the lens and returns its *old* value */
   def assigno(b: B): IndexedState[S, T, A] =
     modo(_ => b)
+
+  /** set the value viewed through the lens and ignores both values */
+  def assigni(b: B): IndexedState[S, T, Unit] =
+    modi(_ => b)
 }
