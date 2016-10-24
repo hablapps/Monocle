@@ -19,6 +19,14 @@ final class StateLensOps[S, T, A, B](lens: PLens[S, T, A, B]) {
   def st: State[S, A] =
     toState
 
+  /** extracts the value viewed through the lens */
+  def extract: State[S, A] =
+    toState
+
+  /** extracts the value viewed through the lens and applies `f` over it */
+  def extracts[B](f: A => B): State[S, B] =
+    toState.map(f)
+
   /** modify the value viewed through the lens and returns its *new* value */
   def mod(f: A => B): IndexedState[S, T, B] =
     IndexedState(s => {

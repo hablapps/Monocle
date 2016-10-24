@@ -9,6 +9,22 @@ class StateExample extends MonocleSuite {
   val _age = GenLens[Person](_.age)
   val p = Person("John", 30)
 
+  test("extract"){
+    val getAge = for {
+      i <- _age extract
+    } yield i
+
+    getAge.run(p) shouldEqual ((Person("John", 30), 30))
+  }
+
+  test("extracts"){
+    val getDoubleAge = for {
+      i <- _age extracts (_ * 2)
+    } yield i
+
+    getDoubleAge.run(p) shouldEqual ((Person("John", 30), 60))
+  }
+
   test("mod"){
     val increment = for {
       i <- _age mod (_ + 1)
