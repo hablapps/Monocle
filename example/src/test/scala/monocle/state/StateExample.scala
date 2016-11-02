@@ -72,6 +72,52 @@ class StateExample extends MonocleSuite {
   val _oldAge = Optional[Person, Int](p => if (p.age > 50) Some(p.age) else None){ a => _.copy(age = a) }
   val _coolGuy = Optional[Person, String](p => if (p.name.startsWith("C")) Some(p.name) else None){ n => _.copy(name = n) }
 
+  test("extract for Optional (predicate is false)"){
+    val youngPerson = Person("John", 30)
+    val update = _oldAge extract
+
+    update.run(youngPerson) shouldEqual ((Person("John", 30), None))
+  }
+
+  test("extract for Optional (predicate is true)"){
+    val oldPerson = Person("John", 100)
+    val update = _oldAge extract
+
+    update.run(oldPerson) shouldEqual ((Person("John", 100), Some(100)))
+  }
+
+  test("extracts for Optional (predicate is false)"){
+    val youngPerson = Person("John", 30)
+    val update = _oldAge extracts (_ * 2)
+
+    update.run(youngPerson) shouldEqual ((Person("John", 30), None))
+  }
+
+  test("extracts for Optional (predicate is true)"){
+    val oldPerson = Person("John", 100)
+    val update = _oldAge extracts (_ * 2)
+
+    update.run(oldPerson) shouldEqual ((Person("John", 100), Some(200)))
+  }
+
+  test("mod for Optional (predicate is false)"){
+    val youngPerson = Person("John", 30)
+    val update = for {
+      i <- _oldAge mod (_ + 1)
+    } yield i
+
+    update.run(youngPerson) shouldEqual ((Person("John", 30), None))
+  }
+
+  test("mod for Optional (predicate is true)"){
+    val oldPerson = Person("John", 100)
+    val update = for {
+      i <- _oldAge mod (_ + 1)
+    } yield i
+
+    update.run(oldPerson) shouldEqual ((Person("John", 101), Some(101)))
+  }
+
   test("modo for Optional (predicate is false)"){
     val youngPerson = Person("John", 30)
     val update = for {
@@ -110,4 +156,67 @@ class StateExample extends MonocleSuite {
     update.run(oldCoolPerson) shouldEqual ((Person("chris", 30), Some("Chris")))
   }
 
+  test("modi for Optional (predicate is false)"){
+    val youngPerson = Person("John", 30)
+    val update = _oldAge modi (_ + 1)
+
+    update.run(youngPerson) shouldEqual ((Person("John", 30), ()))
+  }
+
+  test("modi for Optional (predicate is true)"){
+    val oldPerson = Person("John", 100)
+    val update = _oldAge modi (_ + 1)
+
+    update.run(oldPerson) shouldEqual ((Person("John", 101), ()))
+  }
+
+  test("assign for Optional (predicate is true)"){
+    val oldPerson = Person("John", 100)
+    val update = for {
+      i <- _oldAge assign 30
+    } yield i
+
+    update.run(oldPerson) shouldEqual ((Person("John", 30), Some(30)))
+  }
+
+  test("assign for Optional (predicate is false)"){
+    val youngPerson = Person("John", 30)
+    val update = for {
+      i <- _oldAge assign 100
+    } yield i
+
+    update.run(youngPerson) shouldEqual ((Person("John", 100), Some(100)))
+  }
+
+  test("assigno for Optional (predicate is true)"){
+    val oldPerson = Person("John", 100)
+    val update = for {
+      i <- _oldAge assigno 30
+    } yield i
+
+    update.run(oldPerson) shouldEqual ((Person("John", 30), Some(100)))
+  }
+
+  test("assigno for Optional (predicate is false)"){
+    val youngPerson = Person("John", 30)
+    val update = for {
+      i <- _oldAge assigno 100
+    } yield i
+
+    update.run(youngPerson) shouldEqual ((Person("John", 100), None))
+  }
+
+  test("assigni for Optional (predicate is true)"){
+    val oldPerson = Person("John", 100)
+    val update = _oldAge assigni 30
+
+    update.run(oldPerson) shouldEqual ((Person("John", 30),()))
+  }
+
+  test("assigni for Optional (predicate is false)"){
+    val youngPerson = Person("John", 30)
+    val update = _oldAge assigni 100
+
+    update.run(youngPerson) shouldEqual ((Person("John", 100), ()))
+  }
 }

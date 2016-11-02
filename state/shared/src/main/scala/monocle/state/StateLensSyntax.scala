@@ -41,7 +41,7 @@ final class StateLensOps[S, T, A, B](lens: PLens[S, T, A, B]) {
 
   /** modify the value viewed through the lens and ignores both values */
   def modi(f: A => B): IndexedState[S, T, Unit] =
-    mod(f) >| (())
+    IndexedState(s => (lens.modify(f)(s), ()))
 
   /** set the value viewed through the lens and returns its *new* value */
   def assign(b: B): IndexedState[S, T, B] =
