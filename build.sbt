@@ -97,16 +97,16 @@ lazy val monocle = project.in(file("."))
 lazy val monocleJVM = project.in(file(".monocleJVM"))
   .settings(monocleJvmSettings)
   .aggregate(
-    coreJVM, genericJVM, lawJVM, macrosJVM, stateJVM, refinedJVM, unsafeJVM, testJVM,
+    coreJVM, genericJVM, lawJVM, macrosJVM, stateJVM, readerJVM, refinedJVM, unsafeJVM, testJVM,
     example, docs, bench)
   .dependsOn(
-    coreJVM, genericJVM, lawJVM, macrosJVM, stateJVM, refinedJVM, unsafeJVM, testJVM % "test-internal -> test",
+    coreJVM, genericJVM, lawJVM, macrosJVM, stateJVM, readerJVM, refinedJVM, unsafeJVM, testJVM % "test-internal -> test",
     bench % "compile-internal;test-internal -> test")
 
 lazy val monocleJS = project.in(file(".monocleJS"))
   .settings(monocleJsSettings)
-  .aggregate(coreJS, genericJS, lawJS, macrosJS, stateJS, refinedJS, unsafeJS, testJS)
-  .dependsOn(coreJS, genericJS, lawJS, macrosJS, stateJS, refinedJS, unsafeJS, testJS  % "test-internal -> test")
+  .aggregate(coreJS, genericJS, lawJS, macrosJS, stateJS, readerJS, refinedJS, unsafeJS, testJS)
+  .dependsOn(coreJS, genericJS, lawJS, macrosJS, stateJS, readerJS, refinedJS, unsafeJS, testJS  % "test-internal -> test")
 
 lazy val coreJVM = core.jvm
 lazy val coreJS  = core.js
@@ -170,6 +170,13 @@ lazy val state    = crossProject.dependsOn(core)
   .configureCross(monocleCrossSettings)
   .settings(libraryDependencies ++= Seq(scalaz.value))
 
+lazy val readerJVM = reader.jvm
+lazy val readerJS  = reader.js
+lazy val reader    = crossProject.dependsOn(core)
+  .settings(moduleName := "monocle-reader")
+  .configure(monocleCrossSettings)
+  .settings(libraryDependencies ++= Seq(scalaz.value))
+
 lazy val unsafeJVM = unsafe.jvm
 lazy val unsafeJS  = unsafe.js
 lazy val unsafe    = crossProject.dependsOn(core)
@@ -180,7 +187,7 @@ lazy val unsafe    = crossProject.dependsOn(core)
 
 lazy val testJVM = test.jvm
 lazy val testJS  = test.js
-lazy val test    = crossProject.dependsOn(core, generic, macros, law, state, refined, unsafe)
+lazy val test    = crossProject.dependsOn(core, generic, macros, law, state, reader, refined, unsafe)
   .settings(moduleName := "monocle-test")
   .configureCross(monocleCrossSettings)
   .settings(noPublishSettings: _*)
@@ -197,7 +204,7 @@ lazy val bench = project.dependsOn(coreJVM, genericJVM, macrosJVM)
     compilerPlugin(paradisePlugin)
   )).enablePlugins(JmhPlugin)
 
-lazy val example = project.dependsOn(coreJVM, genericJVM, refinedJVM, macrosJVM, stateJVM, testJVM % "test->test")
+lazy val example = project.dependsOn(coreJVM, genericJVM, refinedJVM, macrosJVM, stateJVM, readerJVM, testJVM % "test->test")
   .settings(moduleName := "monocle-example")
   .settings(monocleJvmSettings)
   .settings(noPublishSettings)
