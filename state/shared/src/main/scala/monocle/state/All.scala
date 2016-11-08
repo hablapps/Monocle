@@ -1,3 +1,6 @@
 package monocle.state
 
-object all extends StateLensSyntax with StateOptionalSyntax
+object all extends StateLensSyntax
+  with StateOptionalSyntax
+  with StateGetterSyntax
+  with StateSetterSyntax
