@@ -1,6 +1,6 @@
 package monocle.state
 
-import monocle.{MonocleSuite, Optional}
+import monocle.{MonocleSuite, Optional, Setter, Getter}
 import monocle.macros.GenLens
 
 class StateExample extends MonocleSuite {
@@ -218,5 +218,33 @@ class StateExample extends MonocleSuite {
     val update = _oldAge assigni 100
 
     update.run(youngPerson) shouldEqual ((Person("John", 100), ()))
+  }
+
+  val _nameSet = Setter[Person, String](f => p => p.copy(name = f(p.name)))
+
+  test("modi for Setter") {
+    val toUpper = _nameSet modi (_.toUpperCase)
+
+    toUpper.run(p) shouldEqual ((Person("JOHN", 30), ()))
+  }
+
+  test("assigni for Setter") {
+    val toUpper = _nameSet assigni ("Juan")
+
+    toUpper.run(p) shouldEqual ((Person("Juan", 30), ()))
+  }
+
+  val _nameGet = Getter[Person, String](_.name)
+
+  test("extract for Getter") {
+    val name = _nameGet extract
+
+    name.run(p) shouldEqual ((Person("John", 30), "John"))
+  }
+
+  test("extracts for Getter") {
+    val upper = _nameGet extracts (_.toUpperCase)
+
+    upper.run(p) shouldEqual ((Person("John", 30), "JOHN"))
   }
 }
