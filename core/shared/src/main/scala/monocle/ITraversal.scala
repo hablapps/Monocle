@@ -26,6 +26,9 @@ abstract class IPTraversal[I, S, T, A, B] {
   def indices(s: S): List[I] =
     getAll(s).map(_._1)
 
+  def length(s: S): Int =
+    getAll(s).length
+
   def isEmpty(s: S): Boolean =
     foldMap(_ => _ => false.conjunction)(s).unwrap
 
